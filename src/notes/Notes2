@@ -1,0 +1,130 @@
+from src.IISMotion import IISMotion
+from src.city.ZoneType import ZoneType
+from src.common.Location import Location
+from src.common.CommonFunctions import CommonFunctions
+from src.common.SimulationClock import *
+import asyncio
+import time
+from src.movement.movementStrategies.MovementStrategyType import MovementStrategyType
+from src.placeable.stationary.Attractor import Attractor
+
+from datetime import datetime
+
+print("Movement simulation started!")
+fun = CommonFunctions()
+
+location = Location()
+# Adhoc networks with larger radius
+location.setLatitude(48.709936)
+location.setLongitude(21.238923)
+location.setAltitude(0)
+radius = 800  # radius around the location that will be included
+nets = [6]
+
+oneway = False
+guiEnabled = True
+gridRows = 30
+secondsPerTick = 1
+iismotion = IISMotion(radius, oneway, location, guiEnabled, gridRows,secondsPerTick)
+
+
+# # OC Galeria
+# iismotion.addMapZone("OC Galeria", ZoneType.ENTERTAINMENT, 80, [Location(48.715232, 21.234898), Location(48.71584, 21.2389540), Location(48.71417088, 21.239554), Location(48.713519, 21.2356710)])
+#
+# # Spolocensky pavilon
+# iismotion.addMapZone("Spolocensky pavilon", ZoneType.ENTERTAINMENT, 20, [Location(48.708224129, 21.23837471), Location(48.70860644, 21.2458419), Location(48.7049955, 21.2429881)])
+#
+# # # Od Toryskej po spolocensky pavilon (vratane)
+# # iismotion.addMapZone("Terasa byvanie", ZoneType.HOUSING, 100 ,[Location(48.713165652, 21.23562812), Location(48.7150345, 21.24687194), Location(48.7028289622, 21.2433528900)])
+#
+# # Hronska az Stefanikova trieda
+# iismotion.addMapZone("Hronska-Stefanikova praca", ZoneType.WORK, 100 ,[Location(48.718064, 21.22601509), Location(48.71814916, 21.233310), Location(48.709710885, 21.236400604), Location(48.70750197, 21.2284612)])
+
+# # Add drones
+# iismotion.createActorCollection("drones", True, MovementStrategyType.DRONE_MOVEMENT_CUDA)
+# iismotion.getActorCollection("drones").addDrones(2)
+# iismotion.getActorCollection("drones").setGuiEnabled(guiEnabled)
+#
+# droneIDs = iismotion.getActorCollection("drones").locationsTable.getAllIds()
+# # move first and second drone to the center of map
+# iismotion.getActorCollection("drones").actorSet[int(droneIDs[0])].setTargetLocation(location)
+# iismotion.getActorCollection("drones").actorSet[int(droneIDs[1])].setTargetLocation(location)
+
+
+# ---------------------------------------------------- Pridavanie obyvatelov ----------------------------------------------------
+# with repeating behaviour
+# iismotion.createActorCollection("personsWithBehaviour", True, MovementStrategyType.PERSON_BEHAVIOUR_CITY_CUDA)
+# iismotion.getActorCollection("personsWithBehaviour").addPersons(5000, False)
+# iismotion.getActorCollection("personsWithBehaviour").setGuiEnabled(guiEnabled)
+#
+#
+# with random waypoint walk
+iismotion.createActorCollection("RandomWaypointWithCuda", True, MovementStrategyType.RANDOM_WAYPOINT_CITY_CUDA)
+iismotion.getActorCollection("RandomWaypointWithCuda").addPersons(1, False)
+iismotion.getActorCollection("RandomWaypointWithCuda").setGuiEnabled(guiEnabled)
+#
+#
+# # how to add Attractor
+# iismotion.createActorCollection("attractors", False, MovementStrategyType.DRONE_MOVEMENT_CUDA)
+# startTime = datetime(2020, 1, 1, 0, 15, 0, 0)
+# endTime = datetime(2020, 1, 1, 0, 40, 0, 0)
+# atractorRadius = 1000
+# iismotion.getActorCollection("attractors").addAttractor(location=iismotion.map.getRandomNode(), startTime=startTime, endtime=endTime, radius=atractorRadius)
+# iismotion.getActorCollection("RandomWaypointWithCuda").attractors = iismotion.getActorCollection("RandomWaypointWithCuda").attractors + list(iismotion.getActorCollection("attractors").actorSet.values())
+
+# # # nacitanie Macrocells
+# iismotion.createActorCollection("macrocells", False, MovementStrategyType.DRONE_MOVEMENT_CUDA)
+# iismotion.getActorCollection("macrocells").loadMacrocells(nets)
+# iismotion.getActorCollection("macrocells").setGuiEnabled(guiEnabled)
+
+# # # nacitanie Femtocells
+# iismotion.createActorCollection("femtocells", False, MovementStrategyType.DRONE_MOVEMENT_CUDA)
+# iismotion.getActorCollection("femtocells").generateFemtocells(5, 150)
+# # iismotion.getActorCollection("femtocells").storeFemtoCells("femtosOnRoads.json")
+# # iismotion.getActorCollection("femtocells").loadFemtocellsFromFile("femtosOnRoads.json")
+# iismotion.getActorCollection("femtocells").setGuiEnabled(guiEnabled)
+#
+#
+# iismotion.map.plotCity('drive',"ExperimentUzly")
+
+async def simulate():
+    print("=================== Simulation started ===================")
+    start = time.time()
+
+    for i in range(0, 499):
+        print("-------------------------------------------------------------------- step: ", i,
+              "-------------------------------------------------------------------")
+
+        stepStart = time.time()
+
+        # pohne objektmi vo vsetkych kolekciach, ktore maju nastavene ableOfMovement=True
+        iismotion.stepAllCollections()
+        # iismotion.logActorsToNearestActorOfCollection(["personsWithBehaviour", "personsBlank"], "femtocells", 50)
+        # iismotion.logActorsToNearestActorOfCollection(["personsWithBehaviour", "personsBlank"], "macrocells", 500)
+
+        stepEnd = time.time()
+        print("took ", stepEnd - stepStart)
+        global DATETIME
+        print("Simulation DateTime is: ", getDateTime())
+        if (guiEnabled == True):
+            await asyncio.sleep(5)
+        end = time.time()
+
+        elapsed = end - start
+    print("================== Simulation finished ===================")
+    print("elapsed time:", elapsed)
+
+
+def main():
+    if (guiEnabled):
+        loop = asyncio.get_event_loop()
+        loop.create_task(simulate())
+        loop.run_until_complete(iismotion.frontend.start_server)
+        loop.run_forever()
+    else:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(simulate())
+
+if __name__ == '__main__':
+    main()
+    # cProfile.run('main()')

@@ -1,0 +1,69 @@
+#  HOW TO USE THE MOVEMENT MODEL - usage template
+
+from src.common.Location import Location
+from src.common.CommonFunctions import CommonFunctions
+from src.MovementModel import MovementModel
+from src.placeable.movable.walkable.Vehicles.Bus import Bus
+import asyncio
+
+common = CommonFunctions()
+
+print("---------- Model started! ----------")
+
+
+# ---------------- settings
+guiEnabled = True                                       # enable or disable model here
+location = Location(40.783349, -73.951782)              # location of the center of desired map
+radius = 100                                            # radius around the location that will be included
+nets = [410, 260]                                       # load only base stations with "net" (MNC) 410 or 260
+
+model = MovementModel(guiEnabled, 200, False, location, nets)     # make instance of model
+
+# adding femtoCells
+model.addFemtoCellsToModel(100,10,1.8,True)             # add 100 femtocells with minimum distance 10m from neighbour femtocells, to the default height 1.8m or to the height of building (True)
+
+# adding persons
+model.addPersonsToModel(5,False)                        # add 5 persons to random location without initial steps made
+model.addPersonsToModel(5,True)                         # add 5 persons to random location WITH random number of initial steps made
+
+# adding car with passangers
+model.addCarsToModel(2,3,True)                          # add 2 cars, each with 3 passangers with initial movement applied
+
+# adding bus with passangers
+bus = Bus()
+l1 = Location(48.734804995327934, 21.288226249333775)
+l2 = Location(48.73414690887267, 21.287775638219273)
+l3 = Location(48.73409029888274, 21.287995579358494)
+l4 = Location(48.73473777183788, 21.288435461636936)
+bus.addStops([ l1, l2, l3, l4])                         # add bus-stops to the buss route
+model.addBusToModel(10, bus)                            # add bus with 10 passengers to the model
+
+
+
+async def simulate():
+    '''
+    Define simulation loop here
+    @return:
+    '''
+    for i in range(0, 100):
+        model.walkStep()
+        await asyncio.sleep(0)
+
+
+def main():
+    '''
+    main method running simulation, with the capability to keep websocket alive needed by JS frontend
+    @return:
+    '''
+    if (guiEnabled):
+        loop = asyncio.get_event_loop()
+        loop.create_task(simulate())
+        loop.run_until_complete(model.frontend.start_server)
+        loop.run_forever()
+    else:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(simulate())
+
+
+if __name__ == '__main__':
+    main()

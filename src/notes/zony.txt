@@ -1,0 +1,76 @@
+
+
+# # Terasa OC Galeria
+# location.setLatitude(48.709936)
+# location.setLongitude(21.238923)
+
+# Takmer Cele Kosice
+# location.setLatitude(48.717426789253444)
+# # location.setLongitude(21.258467452073546)
+# # location.setAltitude(0)
+# # radius = 3500
+
+
+
+
+
+
+
+
+## ---------------------------------------------------- Pridavanie zon ----------------------------------------------------
+# Kosice Juh
+# iismotion.addMapZone("Kosice Juh", ZoneType.HOUSING, 100 ,[Location(48.715, 21.24967), Location(48.71571, 21.26079), Location(48.70937, 21.26273), Location(48.707703, 21.248425)])
+# for housingZone in iismotion.map.mapZones[ZoneType.HOUSING]:
+#     housingZone.printBuildings()
+
+# # Kosice Sever - Vodarenska a Park mladeze
+# iismotion.addMapZone("Kosice Sever", ZoneType.HOUSING, 100 ,[Location(48.741655, 21.248851), Location(48.742517, 21.253683), Location(48.741199, 21.257035), Location(48.738806, 21.251868)])
+#
+# # Kosice Letna
+# iismotion.addMapZone("Kosice Letna", ZoneType.WORK, 100 ,[Location(48.729762, 21.245113), Location(48.731444, 21.249945), Location(48.728457, 21.25261), Location(48.727153, 21.2471)])
+#
+# # Kosice Terasa
+# iismotion.addMapZone("Kosice Jazero", ZoneType.ENTERTAINMENT, 100 ,[Location(48.715978, 21.234677), Location(48.716614, 21.241078), Location(48.713973, 21.241875), Location(48.713073, 21.235946)])
+
+
+
+
+# # pridanie chodcov ktori sa pohybuju iba po cestach
+# iismotion.createActorCollection("personsCity", True, "RandomWaypointCityCuda")
+# iismotion.getActorCollection("personsCity").addPersons(500, False)
+# iismotion.getActorCollection("personsCity").setGuiEnabled(guiEnabled)
+
+
+## ----------------------------------------------- Pridavanie dronov -------------------------------------------------
+# # pridanie dronov
+# iismotion.createActorCollection("drones", True, "DroneMovementCuda")
+# iismotion.getActorCollection("drones").addDrones(300)
+# iismotion.getActorCollection("drones").setGuiEnabled(guiEnabled)
+
+
+## ---------------------------------------------------- Vypocet RSS ----------------------------------------------------
+# # inicializacia objektu pre vypocet RSS hodnot na bunkach gridu ale funguje len vtedy, ked je pridana kolekcia s dronmi
+# rssCalculator = RssCalculator(["drones"], iismotion.mapGrid)
+
+
+
+
+
+## -------------------------------------------- Hladanie objektov z kolekcii ----------------------------------------------
+# # takato metoda vrati najblizsi objekt z kolekcie s nazvom drones, od vlozenej location
+# iismotion.mapGrid.getClosestActorFrom(0, ["drones"], location)
+
+
+
+ # ulozi heatmapu poloh objektov zo vsetkych collections (mame aj veriantu pre zvolene collections)
+        # iismotion.printHeatmapOfAllCollections("step" + str(i))
+
+        # ak by ste chceli pristupit napr ku konkretnemu dronu, viete si ho vytiahnut z kolekcie nasledovnym sposobom
+        # iismotion.getActorCollection("drones").actorSet[334].setTargetLocation(iismotion.map.getRandomPoint())
+
+        # ak chcete ulozit heatmapu RSS, najprv treba spravit update
+        # rssCalculator.updateRssOfAllCells()
+        # a potom sa da ulozit nasledovnym sposobom (ALE UPOZORNUJEM, zda sa, ze je hore nohami)
+        # iismotion.imagePrinter.save2DArrayAsPicture("testRss"+str(i), iismotion.mapGrid.getRssPerCell())
+
+        # print(iismotion.mapGrid.getRssPerCell())
